@@ -40,6 +40,7 @@ tomando su `examples/privy-google-aa` como base del cliente.
 | `upload-lighthouse.js` | Sube una carpeta a IPFS por Lighthouse y devuelve el CID del directorio |
 | `contracts/` | `PixelFlores.sol` — ERC-721 sin dependencias, minteo secuencial, `baseURI` inmutable |
 | `webapp/` | Vite + React + Privy + backend `/api` en un solo servicio |
+| `assets/` | Las 5000 imágenes (3.2 MB) + índice de traits: fallback público servido por GitHub raw |
 | `docs/generator.md` | Traits, rareza y uso del generador |
 | `docs/ipfs.md` | CIDs, cómo se publicó y cómo reproducirlos |
 
@@ -60,6 +61,22 @@ npm install && npm run dev             # app + /api en :5173
 
 Para desplegar el contrato hacen falta las claves permisionadas de LNet
 (`RELAYER_PK`, `SENDER_PK`): ver `webapp/README.md`.
+
+## De dónde salen las imágenes
+
+El `tokenURI` apunta a IPFS y esa es la fuente canónica, pero los CIDs los provee un
+solo nodo: la primera lectura de cada archivo por un gateway público tarda ~12 s
+(búsqueda en la DHT + descarga desde ese nodo), lo que deja una galería de imágenes
+rotas. Así que la UI resuelve cada imagen en orden:
+
+1. **Espejo del deploy** — `public/flowers/<id>.png`, servido por CDN.
+   Se genera con `node webapp/scripts/mirror-assets.cjs` antes de desplegar.
+2. **GitHub raw** — `assets/flowers/<id>.png` de este repo, con CORS abierto.
+   Es lo que hace que un clon recién bajado ya muestre las flores.
+3. **Gateways IPFS** — `ipfs.io`, `dweb.link`, `4everland.io`.
+
+Los traits siguen el mismo patrón con un índice único (`traits.json`, 991 KB para
+las 5000) en vez de 5000 JSON sueltos.
 
 ## Cuatro cosas que hay que saber de LNET
 

@@ -27,12 +27,43 @@ const localFirst =
     : [];
 
 /** Si un gateway no responde, la imagen se reintenta con el siguiente. */
-export const gateways = [...localFirst, ipfs.gateway, "https://dweb.link", "https://4everland.io"].filter(
+export const gateways = [ipfs.gateway, "https://dweb.link", "https://4everland.io"].filter(
   (g, i, all) => all.indexOf(g) === i,
 );
 
-export const imageUrl = (tokenId: number | bigint, gw = 0) =>
-  `${gateways[Math.min(gw, gateways.length - 1)]}/ipfs/${ipfs.images}/${tokenId}.png`;
+// Espejo servido por el propio deploy (scripts/mirror-assets.cjs). Los CIDs los
+// provee un solo nodo, así que un gateway público tarda ~12s en la primera lectura
+// de cada archivo: el tokenURI sigue siendo IPFS, pero la UI pinta desde acá y usa
+// los gateways como fallback. Vacío = solo IPFS.
+const mirror = (import.meta.env.VITE_ASSET_MIRROR ?? "/flowers").replace(/\/+$/, "");
+
+// Fallback público en GitHub: si el espejo del deploy no está (o se clonó el repo
+// y no se corrió mirror-assets), las imágenes salen igual desde el repo, que las
+// sirve con CORS abierto. Último recurso: los gateways IPFS.
+const githubAssets = (
+  import.meta.env.VITE_GITHUB_ASSETS ??
+  "https://raw.githubusercontent.com/LNetNetworks/aa-nft-example/main/assets"
+).replace(/\/+$/, "");
+
+/** Orígenes de la imagen, en orden de preferencia. */
+export const imageSources = (tokenId: number | bigint): string[] => [
+  ...(mirror ? [`${mirror}/${tokenId}.png`] : []),
+  ...(githubAssets ? [`${githubAssets}/flowers/${tokenId}.png`] : []),
+  ...gateways.map((g) => `${g}/ipfs/${ipfs.images}/${tokenId}.png`),
+];
+
+export const imageUrl = (tokenId: number | bigint, i = 0) => {
+  const all = imageSources(tokenId);
+  return all[Math.min(i, all.length - 1)];
+};
+export const imageSourceCount = (tokenId: number | bigint) => imageSources(tokenId).length;
+
+/** Índice único con los traits de las 5000, para no pedir 5000 JSON al gateway. */
+export const traitsIndexSources = [
+  (import.meta.env.VITE_TRAITS_INDEX ?? "/traits.json") || null,
+  githubAssets ? `${githubAssets}/traits.json` : null,
+].filter((u): u is string => !!u);
+
 export const metadataUrl = (tokenId: number | bigint, gw = 0) =>
   `${gateways[Math.min(gw, gateways.length - 1)]}/ipfs/${ipfs.metadata}/${tokenId}.json`;
 

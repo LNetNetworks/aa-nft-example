@@ -14,3 +14,6 @@ webapp/server/*.db
 # salida generada (42 MB de PNG + JSON: se regenera con un comando)
 collection/
 output*/
+
+# assets/ NO se ignora: es el fallback público de las imágenes (3.2 MB) que sirve
+# raw.githubusercontent.com cuando el espejo del deploy no está.

@@ -1,3 +1,7 @@
 .env
 node_modules/
 dist/
+.vercel
+.env*
+public/flowers/
+public/traits.json

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
-import { explorerAddress, explorerToken, gateways, imageUrl, metadataUrl } from "./lnet";
+import { explorerAddress, explorerToken, imageSourceCount, imageUrl, metadataUrl, traitsIndexSources } from "./lnet";
 import {
   accountDeployed,
   mint,
@@ -23,14 +23,14 @@ type TokenMeta = { name: string; attributes: Trait[] };
 
 /** Un gateway público puede fallar; se reintenta con el siguiente. */
 function PixImg({ id, className }: { id: number; className: string }) {
-  const [gw, setGw] = useState(0);
+  const [src, setSrc] = useState(0);
   return (
     <img
       className={className}
-      src={imageUrl(id, gw)}
+      src={imageUrl(id, src)}
       alt={`Flor #${id}`}
       loading="lazy"
-      onError={() => setGw((g) => (g + 1 < gateways.length ? g + 1 : g))}
+      onError={() => setSrc((i) => (i + 1 < imageSourceCount(id) ? i + 1 : i))}
     />
   );
 }
@@ -112,9 +112,37 @@ export function App() {
     };
   }, [wallet?.address, configured, collection?.totalMinted]);
 
+  // Los traits salen del índice servido por el deploy (una sola descarga para las
+  // 5000). Si no está, se cae al JSON del token en IPFS.
+  const indexRef = useRef<Record<string, [string, string][]> | null | "failed">(null);
+
   const openToken = useCallback(async (id: number) => {
     setOpen(id);
     setMeta((m) => (m[id] && m[id] !== "error" ? m : { ...m, [id]: "loading" }));
+
+    if (indexRef.current === null) {
+      for (const url of traitsIndexSources) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          indexRef.current = await res.json();
+          break;
+        } catch {
+          /* siguiente origen */
+        }
+      }
+      if (indexRef.current === null) indexRef.current = "failed";
+    }
+    const fromIndex =
+      indexRef.current && indexRef.current !== "failed" ? indexRef.current[String(id)] : null;
+    if (fromIndex) {
+      setMeta((m) => ({
+        ...m,
+        [id]: { name: `Flor #${id}`, attributes: fromIndex.map(([k, v]) => ({ trait_type: k, value: v })) },
+      }));
+      return;
+    }
+
     try {
       const res = await fetch(metadataUrl(id));
       if (!res.ok) throw new Error(String(res.status));
