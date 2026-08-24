@@ -256,7 +256,9 @@ export function App() {
               disabled={!ready || !authenticated || busy || !configured || soldOut}
               onClick={onMint}
             >
-              {busy ? "Minteando…" : soldOut ? "Agotado" : nextId ? `Mintear #${nextId}` : "Mintear"}
+              {/* Sin el id: entre leer totalMinted y que el UserOp entre puede mintear
+                  otro usuario, así que el número del botón podría no ser el que sale. */}
+              {busy ? "Minteando…" : soldOut ? "Agotado" : "Mintear un NFT"}
             </button>
             {status.message && <p className={`status ${status.state}`}>{status.message}</p>}
           </div>
