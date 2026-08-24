@@ -1,0 +1,253 @@
+/* Paleta comprometida con el modo oscuro: todos los colores se declaran acá,
+   sin depender de prefers-color-scheme (mezclar un tema claro heredado con
+   reglas oscuras era lo que dejaba texto negro sobre fondo negro). */
+:root {
+  --bg: #0a0912;
+  --surface: #130f22b8;
+  --surface-solid: #191627;
+  --line: #2e2a44;
+  --line-soft: #221f33;
+  --text: #f4f1fa;
+  --muted: #a49ac0;
+  --accent: #ff4fa3;
+  --accent-dim: #ff4fa322;
+  --teal: #45e0b8;
+  --amber: #ffc93c;
+  --danger: #ff8080;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--bg); }
+
+/* Los degradados van en el propio body: un div con z-index negativo lo tapa el
+   fondo plano del body y el color casi no se ve. `fixed` los deja quietos al
+   scrollear. */
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(760px 460px at 6% -6%, #ff4fa37a, transparent 62%),
+    radial-gradient(680px 420px at 97% -2%, #6ec6ff5c, transparent 64%),
+    radial-gradient(760px 520px at 80% 96%, #45e0b842, transparent 64%),
+    radial-gradient(600px 420px at 18% 106%, #b07cff4a, transparent 62%),
+    linear-gradient(168deg, #2a1c58 0%, #171132 30%, #0d0a1a 66%, var(--bg) 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  color: var(--text);
+  font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Grilla de píxeles tenue sobre el degradado, guiño al arte de la colección. */
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, #ffffff1f 1px, transparent 1px),
+    linear-gradient(to bottom, #ffffff1f 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: linear-gradient(180deg, #000 0%, #0008 45%, transparent 80%);
+}
+
+main { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 34px 22px 80px; }
+
+/* ------------------------------------------------------------------ header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+h1 {
+  margin: 0;
+  font-size: clamp(22px, 3.4vw, 32px);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+h1 b {
+  background: linear-gradient(92deg, #ff8fc7, var(--accent) 45%, #b07cff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 750;
+}
+h1 span { font-size: 0.55em; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+
+.session { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+.session .mail { max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ------------------------------------------------------------------- botones */
+button { font: inherit; cursor: pointer; border-radius: 10px; transition: 120ms ease; }
+button:disabled { cursor: not-allowed; opacity: 0.45; box-shadow: none; filter: grayscale(0.4); }
+
+.btn {
+  border: 0;
+  padding: 11px 20px;
+  font-weight: 600;
+  color: #140a10;
+  background: linear-gradient(96deg, #ffb0d4, var(--accent));
+  box-shadow: 0 6px 22px -8px var(--accent);
+}
+.btn:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+.btn.big { width: 100%; padding: 15px 20px; font-size: 16px; }
+
+.btn-ghost {
+  background: #ffffff0d;
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 8px 14px;
+  font-size: 13px;
+}
+.btn-ghost:hover:not(:disabled) { background: #ffffff16; border-color: #45415f; }
+
+/* -------------------------------------------------------------------- cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+  backdrop-filter: blur(10px);
+}
+
+.card.mint { position: relative; overflow: hidden; }
+.card.mint::before {
+  content: "";
+  position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
+  background: linear-gradient(90deg, transparent, #ff4fa3aa, #b07cff88, transparent);
+}
+.mint { display: grid; grid-template-columns: 1.15fr 1fr; gap: 26px; align-items: center; }
+@media (max-width: 720px) { .mint { grid-template-columns: 1fr; gap: 18px; } }
+
+.count { display: flex; align-items: baseline; gap: 9px; }
+.count b { font-size: 44px; line-height: 1; font-weight: 700; letter-spacing: -0.03em; }
+.count span { color: var(--muted); font-size: 14px; }
+
+.bar { height: 7px; border-radius: 99px; background: #ffffff14; overflow: hidden; margin: 14px 0 4px; }
+.bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), #b07cff); }
+
+.next { color: var(--muted); font-size: 13px; }
+.next b { color: var(--text); }
+
+.rows { display: grid; gap: 8px; margin-top: 14px; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; }
+.row span { color: var(--muted); }
+.row code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--text); }
+
+/* ------------------------------------------------------------------- estados */
+.status { margin: 14px 0 0; padding: 10px 13px; border-radius: 10px; font-size: 13px; border: 1px solid transparent; }
+.status.ok { background: #45e0b81a; border-color: #45e0b840; color: #9df3dc; }
+.status.error { background: #ff80801a; border-color: #ff808040; color: #ffb3b3; white-space: pre-wrap; word-break: break-word; }
+.status.running { background: #b07cff1a; border-color: #b07cff40; color: #d6c2ff; }
+
+/* --------------------------------------------------------------------- tabs */
+.tabs { display: flex; gap: 8px; margin: 28px 0 14px; align-items: center; flex-wrap: wrap; }
+.tab {
+  background: transparent;
+  border: 1px solid var(--line-soft);
+  color: var(--muted);
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 550;
+}
+.tab:hover { color: var(--text); border-color: var(--line); }
+.tab[aria-selected="true"] { background: var(--accent-dim); border-color: #ff4fa366; color: #ffc4e0; }
+.tab i { font-style: normal; opacity: 0.65; margin-left: 6px; }
+.tabs .spacer { flex: 1; }
+
+/* ------------------------------------------------------------------ galería */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 13px; }
+
+.tile {
+  position: relative;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0d0b16;
+  aspect-ratio: 1;
+}
+.tile:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 10px 26px -14px #000; }
+.tile.mine { border-color: #45e0b866; }
+.tile img { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.tile .id {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 12px 8px 5px;
+  font: 600 11px/1 ui-monospace, Menlo, monospace;
+  color: #fff;
+  background: linear-gradient(transparent, #000000cc);
+  text-align: left;
+}
+.tile .own { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 99px; background: var(--teal); box-shadow: 0 0 0 3px #0d0b16; }
+
+.empty { color: var(--muted); font-size: 14px; padding: 26px 0; text-align: center; }
+
+/* -------------------------------------------------------------------- modal */
+.overlay {
+  position: fixed; inset: 0; z-index: 10;
+  display: grid; place-items: center; padding: 22px;
+  background: #05040acc;
+  backdrop-filter: blur(6px);
+}
+.modal {
+  width: min(390px, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 30px 70px -30px #000;
+}
+.modal header { margin: 0 0 16px; }
+.modal h2 { margin: 0; font-size: 19px; font-weight: 650; }
+.modal .close { background: #ffffff0d; border: 1px solid var(--line); color: var(--text); width: 32px; height: 32px; line-height: 1; font-size: 17px; }
+/* Más chica que antes: con el pie de la planta y los traits, a 100% no entraba. */
+.shot {
+  display: block; margin: 0 auto;
+  width: min(232px, 62vh); aspect-ratio: 1; image-rendering: pixelated;
+  border-radius: 12px; border: 1px solid var(--line-soft); background: #0d0b16;
+}
+
+/* pie de la planta: dueño del token */
+.owner {
+  margin: 14px 0 0; padding: 10px 12px;
+  background: #ffffff08; border: 1px solid var(--line-soft); border-radius: 10px;
+  display: grid; gap: 3px;
+}
+.owner .k { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+.owner a { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; color: var(--teal); text-decoration: none; }
+.owner a:hover { text-decoration: underline; }
+.owner .mail { font-size: 12.5px; color: var(--text); }
+.owner .badge { justify-self: start; margin-top: 2px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #0d3b30; background: var(--teal); padding: 2px 7px; border-radius: 99px; }
+
+.actions { display: flex; gap: 8px; margin-top: 16px; }
+.actions a {
+  flex: 1; text-align: center; text-decoration: none;
+  border-radius: 10px; padding: 10px 12px; font-size: 13px; font-weight: 600;
+}
+.actions .primary { color: #140a10; background: linear-gradient(96deg, #ffb0d4, var(--accent)); }
+.actions .secondary { color: var(--text); background: #ffffff0d; border: 1px solid var(--line); }
+.actions a:hover { filter: brightness(1.08); }
+.traits { list-style: none; padding: 0; margin: 14px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.traits li {
+  display: flex; flex-direction: column; gap: 2px;
+  background: #ffffff08; border: 1px solid var(--line-soft);
+  border-radius: 9px; padding: 7px 10px;
+}
+.traits dt, .traits .k { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+.traits .v { font-size: 13px; font-weight: 600; }
+.traits li.hl { background: var(--accent-dim); border-color: #ff4fa344; }
+.traits li.hl .v { color: #ffc4e0; }
+.link { display: inline-block; margin-top: 14px; font-size: 12px; color: var(--muted); }
+.link:hover { color: var(--accent); }

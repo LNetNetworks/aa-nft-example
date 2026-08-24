@@ -1,0 +1,29 @@
+{
+  "name": "pixel-flores-webapp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5173",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 5173",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test server/*.test.mjs",
+    "deploy": "node scripts/deploy-nft.cjs"
+  },
+  "dependencies": {
+    "@privy-io/react-auth": "^2.24.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "buffer": "^6.0.3",
+    "ethers": "^6.17.0",
+    "vite": "^6.0.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

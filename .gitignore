@@ -1,0 +1,16 @@
+# secretos: claves de LNet, Keycloak, Privy, IPFS
+.env
+.env.local
+*.pem
+
+# dependencias y builds
+node_modules/
+dist/
+contracts/out/
+contracts/cache/
+contracts/lib/
+webapp/server/*.db
+
+# salida generada (42 MB de PNG + JSON: se regenera con un comando)
+collection/
+output*/

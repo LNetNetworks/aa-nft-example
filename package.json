@@ -1,0 +1,17 @@
+{
+  "name": "pixel-flores",
+  "version": "1.0.0",
+  "description": "Generador random de NFTs: flores pixel art de 100x100 px, sin dependencias",
+  "main": "generate.js",
+  "bin": {
+    "pixel-flores": "generate.js"
+  },
+  "scripts": {
+    "gen": "node generate.js --count 20 --out ./output --seed nftlnet",
+    "gen:hd": "node generate.js --count 20 --out ./output-hd --seed nftlnet --scale 20"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@lighthouse-web3/sdk": "^0.4.7"
+  }
+}
