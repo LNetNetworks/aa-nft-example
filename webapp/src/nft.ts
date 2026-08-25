@@ -63,6 +63,27 @@ const nftIface = new Interface(NFT_ABI);
 
 export const nftConfigured = () => /^0x[0-9a-fA-F]{40}$/.test(lnet.nft);
 
+/**
+ * Traduce el error de una operación a algo mostrable. El caso importante es que
+ * el usuario no firme: ethers tira un ACTION_REJECTED con el payload completo del
+ * personal_sign adentro, y volcarlo en pantalla no le dice nada a nadie. No es un
+ * fallo, es una decisión, así que se reporta como cancelación.
+ */
+export function describeError(err: unknown): { cancelled: boolean; message: string } {
+  const e = err as {
+    code?: string | number;
+    message?: string;
+    info?: { error?: { code?: number; message?: string } };
+  };
+  const rejected =
+    e?.code === "ACTION_REJECTED" ||
+    e?.code === 4001 ||
+    e?.info?.error?.code === 4001 ||
+    /user rejected|user denied|rejected the request/i.test(e?.message || "");
+  if (rejected) return { cancelled: true, message: "Operación cancelada" };
+  return { cancelled: false, message: e?.message || String(err) };
+}
+
 function nftContract() {
   if (!nftConfigured()) {
     throw new Error(

@@ -284,3 +284,5 @@ button:disabled { cursor: not-allowed; opacity: 0.45; box-shadow: none; filter: 
 @media (prefers-reduced-motion: reduce) {
   .floader .petal, .floader .pistil, .floader .stem { animation: none; opacity: 0.9; }
 }
+/* Cancelar no es un fallo: se muestra neutro, no en rojo. */
+.status.cancel { background: #ffffff0d; border-color: var(--line); color: var(--muted); }

@@ -3,6 +3,7 @@ import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { explorerAddress, explorerToken, imageSourceCount, imageUrl, metadataUrl, traitsIndexSources } from "./lnet";
 import {
   accountDeployed,
+  describeError,
   mint,
   nftConfigured,
   readAllMinted,
@@ -17,7 +18,7 @@ import { endSession, setPrivyTokenProvider } from "./session";
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 
-type Status = { state: "idle" | "running" | "ok" | "error"; message: string };
+type Status = { state: "idle" | "running" | "ok" | "error" | "cancel"; message: string };
 type Trait = { trait_type: string; value: string | number };
 type TokenMeta = { name: string; attributes: Trait[] };
 
@@ -199,7 +200,8 @@ export function App() {
         void openToken(id);
       }
     } catch (err) {
-      setStatus({ state: "error", message: (err as Error).message });
+      const { cancelled, message } = describeError(err);
+      setStatus({ state: cancelled ? "cancel" : "error", message });
     } finally {
       minting.current = false;
     }
@@ -239,7 +241,12 @@ export function App() {
             </div>
           ) : (
             <button className="btn" disabled={busy} onClick={async () => {
-              try { await login(); } catch (e) { setStatus({ state: "error", message: (e as Error).message }); }
+              try {
+                await login();
+              } catch (e) {
+                const { cancelled, message } = describeError(e);
+                setStatus({ state: cancelled ? "cancel" : "error", message });
+              }
             }}>Entrar con Google</button>
           ))}
         </header>
