@@ -21,6 +21,24 @@ type Status = { state: "idle" | "running" | "ok" | "error"; message: string };
 type Trait = { trait_type: string; value: string | number };
 type TokenMeta = { name: string; attributes: Trait[] };
 
+// Flor pixelada que "abre" los pétalos en círculo mientras la operación viaja.
+// Mismo lenguaje visual que el arte: cuadrados y bordes duros, sin suavizado.
+const PETALS = [
+  [9, 1], [16, 4], [16, 12], [9, 15], [2, 12], [2, 4],
+] as const;
+
+function FlowerLoader({ size = 76 }: { size?: number }) {
+  return (
+    <svg className="floader" viewBox="0 0 24 24" width={size} height={size} shapeRendering="crispEdges" aria-hidden="true">
+      {PETALS.map(([x, y], i) => (
+        <rect key={i} className="petal" x={x} y={y} width="6" height="6" style={{ animationDelay: `${i * 0.15}s` }} />
+      ))}
+      <rect className="pistil" x="9" y="8" width="6" height="6" />
+      <rect className="stem" x="11" y="14" width="2" height="9" />
+    </svg>
+  );
+}
+
 /** Un gateway público puede fallar; se reintenta con el siguiente. */
 function PixImg({ id, className }: { id: number; className: string }) {
   const [src, setSrc] = useState(0);
@@ -163,7 +181,9 @@ export function App() {
     setResult(null);
     try {
       setStatus({ state: "running", message: "Firmando y enviando…" });
-      const res = await mint(await wallet.getEthereumProvider());
+      const res = await mint(await wallet.getEthereumProvider(), (m) =>
+        setStatus({ state: "running", message: m }),
+      );
       setResult(res);
       if (!res.success) {
         setStatus({ state: "error", message: res.revertReason || "La ejecución falló" });
@@ -260,7 +280,14 @@ export function App() {
                   otro usuario, así que el número del botón podría no ser el que sale. */}
               {busy ? "Minteando…" : soldOut ? "Agotado" : "Mintear un NFT"}
             </button>
-            {status.message && <p className={`status ${status.state}`}>{status.message}</p>}
+            {busy ? (
+              <div className="minting">
+                <FlowerLoader />
+                <p>{status.message || "Minteando…"}</p>
+              </div>
+            ) : (
+              status.message && <p className={`status ${status.state}`}>{status.message}</p>
+            )}
           </div>
         </section>
 

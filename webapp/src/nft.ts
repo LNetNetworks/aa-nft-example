@@ -309,15 +309,18 @@ export function mintInFlight(): boolean {
   return inFlight !== null;
 }
 
-export function mint(ethereumProvider: Eip1193Provider): Promise<MintResult> {
+export type MintPhase = (message: string) => void;
+
+export function mint(ethereumProvider: Eip1193Provider, onPhase?: MintPhase): Promise<MintResult> {
   if (inFlight) return inFlight;
-  inFlight = mintOnce(ethereumProvider).finally(() => {
+  inFlight = mintOnce(ethereumProvider, onPhase).finally(() => {
     inFlight = null;
   });
   return inFlight;
 }
 
-async function mintOnce(ethereumProvider: Eip1193Provider): Promise<MintResult> {
+async function mintOnce(ethereumProvider: Eip1193Provider, onPhase?: MintPhase): Promise<MintResult> {
+  const phase = (m: string) => onPhase?.(m);
   if (!nftConfigured()) {
     throw new Error("VITE_NFT_ADDRESS no está configurada — falta desplegar el contrato");
   }
@@ -325,6 +328,7 @@ async function mintOnce(ethereumProvider: Eip1193Provider): Promise<MintResult> 
   const signer = await browserProvider.getSigner();
   const owner = await signer.getAddress();
 
+  phase("Preparando la operación…");
   const sender = await smartAccountOf(owner);
   const deployed = await accountDeployed(sender);
 
@@ -352,13 +356,16 @@ async function mintOnce(ethereumProvider: Eip1193Provider): Promise<MintResult> 
   };
 
   const userOpHash = await entryPoint.getUserOpHash(op);
+  phase(deployed ? "Firmando…" : "Firmando y creando tu cuenta…");
   op.signature = await signer.signMessage(getBytes(userOpHash));
 
+  phase("Enviando al bundler…");
   const returned = await bundlerSend<string>("eth_sendUserOperation", [serialize(op), lnet.entryPoint]);
   if (returned.toLowerCase() !== userOpHash.toLowerCase()) {
     throw new Error(`El bundler devolvió ${returned}, se esperaba ${userOpHash}`);
   }
 
+  phase("Esperando confirmación en LNET…");
   const receipt = await waitForReceipt(userOpHash);
   // Inclusión no es ejecución: un UserOp cuyo call interno revierte igual entra
   // en un tx exitoso, así que hay que mirar `success` del receipt.
