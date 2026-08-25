@@ -3,7 +3,7 @@
    reglas oscuras era lo que dejaba texto negro sobre fondo negro). */
 :root {
   --bg: #0a0912;
-  --surface: #130f22b8;
+  --surface: #130f22e0;
   --surface-solid: #191627;
   --line: #2e2a44;
   --line-soft: #221f33;
@@ -21,32 +21,39 @@
 
 html { background: var(--bg); }
 
-/* Los degradados van en el propio body: un div con z-index negativo lo tapa el
-   fondo plano del body y el color casi no se ve. `fixed` los deja quietos al
-   scrollear. */
+/* El degradado vive en .bg (fixed, sin background-attachment): con
+   `background-attachment: fixed` en el body, cada composición encima —el modal de
+   Privy y su fondo borroso— obliga a repintar la página entera, y eso se ve como
+   un parpadeo del blur. */
 body {
   margin: 0;
   min-height: 100vh;
   background-color: var(--bg);
+  color: var(--text);
+  font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fondo decorativo: degradados + grilla de píxeles. Capa propia y aislada, para
+   que nada de lo que se anime arriba obligue a recalcularla. */
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  transform: translateZ(0);
   background-image:
     radial-gradient(760px 460px at 6% -6%, #ff4fa37a, transparent 62%),
     radial-gradient(680px 420px at 97% -2%, #6ec6ff5c, transparent 64%),
     radial-gradient(760px 520px at 80% 96%, #45e0b842, transparent 64%),
     radial-gradient(600px 420px at 18% 106%, #b07cff4a, transparent 62%),
     linear-gradient(168deg, #2a1c58 0%, #171132 30%, #0d0a1a 66%, var(--bg) 100%);
-  background-attachment: fixed;
   background-repeat: no-repeat;
-  color: var(--text);
-  font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  -webkit-font-smoothing: antialiased;
 }
-
-/* Grilla de píxeles tenue sobre el degradado, guiño al arte de la colección. */
-.bg {
-  position: fixed;
+.bg::after {
+  content: "";
+  position: absolute;
   inset: 0;
-  z-index: 0;
-  pointer-events: none;
   background-image:
     linear-gradient(to right, #ffffff1f 1px, transparent 1px),
     linear-gradient(to bottom, #ffffff1f 1px, transparent 1px);
@@ -117,7 +124,6 @@ button:disabled { cursor: not-allowed; opacity: 0.45; box-shadow: none; filter: 
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 22px;
-  backdrop-filter: blur(10px);
 }
 
 .card.mint { position: relative; overflow: hidden; }
@@ -256,6 +262,7 @@ button:disabled { cursor: not-allowed; opacity: 0.45; box-shadow: none; filter: 
 .minting { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 16px; }
 .minting p { margin: 0; font-size: 13px; color: var(--muted); text-align: center; min-height: 18px; }
 
+.floader { will-change: opacity; transform: translateZ(0); }
 .floader .petal {
   fill: var(--accent);
   opacity: 0.24;
